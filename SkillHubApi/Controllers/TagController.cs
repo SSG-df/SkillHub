@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SkillHubApi.Dtos;
 using SkillHubApi.Services;
+using System.Security.Claims;
 
 namespace SkillHubApi.Controllers
 {
@@ -16,6 +18,7 @@ namespace SkillHubApi.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var result = await _tagService.GetAllAsync();
@@ -23,34 +26,81 @@ namespace SkillHubApi.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _tagService.GetByIdAsync(id);
-            if (result == null) return NotFound();
-            return Ok(result);
+            return result == null ? NotFound() : Ok(result);
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Mentor")]
         public async Task<IActionResult> Create([FromBody] TagCreateDto dto)
         {
-            var created = await _tagService.CreateAsync(dto);
-            return Ok(created);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userId, out var currentUserId))
+            return Unauthorized();
+
+            var tag = await _tagService.CreateAsync(dto, currentUserId);
+            return CreatedAtAction(nameof(GetById), new { id = tag.Id }, tag);
         }
+       
 
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> Update(Guid id, [FromBody] TagUpdateDto dto)
         {
+            var currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            
+            if (currentUserRole != "Admin" && currentUserRole != "Mentor")
+            {
+                return Forbid();
+            }
+
+            if (currentUserRole != "Admin")
+            {
+                var tag = await _tagService.GetByIdAsync(id);
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                
+                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var currentUserId))
+                {
+                    return Forbid();
+                }
+
+                if (tag?.CreatedBy != currentUserId)
+                {
+                    return Forbid();
+                }
+            }
+
             var success = await _tagService.UpdateAsync(id, dto);
-            if (!success) return NotFound();
-            return Ok();
+            return success ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> Delete(Guid id)
         {
+            var currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+    
+            if (currentUserRole != "Admin")
+            {
+                var tag = await _tagService.GetByIdAsync(id);
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+                if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var currentUserId))
+                {
+                    return Forbid();
+                }
+
+                if (tag?.CreatedBy != currentUserId)
+                {
+                    return Forbid();
+                }
+            }
+
             var success = await _tagService.DeleteAsync(id);
-            if (!success) return NotFound();
-            return Ok();
+            return success ? NoContent() : NotFound();
         }
     }
 }

@@ -1,4 +1,7 @@
 using SkillHubApi.Dtos;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SkillHubApi.Services
 {
@@ -9,5 +12,7 @@ namespace SkillHubApi.Services
         Task<AttendanceDto> AddAsync(AttendanceCreateDto dto);
         Task<bool> UpdateAsync(Guid id, AttendanceUpdateDto dto);
         Task<bool> DeleteAsync(Guid id);
+        
+        Task<bool> VerifyAccessAsync(Guid attendanceId, Guid userId);
     }
 }

@@ -11,6 +11,7 @@ namespace SkillHubApi.Models
         public Guid TagId { get; set; }
         public Tag? Tag { get; set; }
         [JsonConverter(typeof(DateTimeJsonConverter))]
+        public Guid CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

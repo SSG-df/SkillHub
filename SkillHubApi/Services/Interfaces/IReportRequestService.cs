@@ -1,5 +1,6 @@
 using SkillHubApi.Dtos;
 
+
 namespace SkillHubApi.Services
 {
     public interface IReportRequestService
@@ -11,4 +12,3 @@ namespace SkillHubApi.Services
         Task<bool> DeleteAsync(Guid id);
     }
 }
-

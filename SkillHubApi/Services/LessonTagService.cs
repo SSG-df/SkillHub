@@ -2,16 +2,26 @@ using SkillHubApi.Data;
 using SkillHubApi.Dtos;
 using SkillHubApi.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 namespace SkillHubApi.Services
 {
     public class LessonTagService : ILessonTagService
     {
         private readonly SkillHubDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public LessonTagService(SkillHubDbContext context)
+        public LessonTagService(SkillHubDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        private Guid GetCurrentUserId()
+        {
+            var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return Guid.TryParse(userId, out var result) ? result : Guid.Empty;
         }
 
         public async Task<IEnumerable<LessonTagDto>> GetAllAsync()
@@ -26,7 +36,8 @@ namespace SkillHubApi.Services
                     Tag = new TagDto
                     {
                         Id = lt.Tag.Id,
-                        Name = lt.Tag.Name
+                        Name = lt.Tag.Name,
+                        CreatedBy = lt.Tag.CreatedBy
                     }
                 })
                 .ToListAsync();
@@ -48,39 +59,42 @@ namespace SkillHubApi.Services
                 Tag = new TagDto
                 {
                     Id = lessonTag.Tag.Id,
-                    Name = lessonTag.Tag.Name
+                    Name = lessonTag.Tag.Name,
+                    CreatedBy = lessonTag.Tag.CreatedBy
                 }
             };
         }
 
         public async Task<LessonTagDto> CreateAsync(LessonTagCreateDto dto)
         {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId == Guid.Empty)
+                throw new UnauthorizedAccessException("User not authenticated");
+
             if (string.IsNullOrWhiteSpace(dto.TagName))
                 throw new ArgumentException("TagName is required");
 
-            // ищем существующий тег
             var tag = await _context.Tags
                 .FirstOrDefaultAsync(t => t.Name.ToLower() == dto.TagName.ToLower());
 
-            // если не существует — создаём
             if (tag == null)
             {
                 tag = new Tag
                 {
                     Id = Guid.NewGuid(),
-                    Name = dto.TagName
+                    Name = dto.TagName,
+                    CreatedBy = currentUserId,
+                    CreatedAt = DateTime.UtcNow
                 };
                 _context.Tags.Add(tag);
-                await _context.SaveChangesAsync(); // обязательно сохранить, чтобы получить Id
+                await _context.SaveChangesAsync();
             }
 
-            // проверка на дубликат
             var exists = await _context.LessonTags
                 .AnyAsync(lt => lt.LessonId == dto.LessonId && lt.TagId == tag.Id);
             if (exists)
                 throw new InvalidOperationException("This tag is already linked to the lesson.");
 
-            // создаём LessonTag
             var lessonTag = new LessonTag
             {
                 LessonId = dto.LessonId,
@@ -99,7 +113,8 @@ namespace SkillHubApi.Services
                 Tag = new TagDto
                 {
                     Id = tag.Id,
-                    Name = tag.Name
+                    Name = tag.Name,
+                    CreatedBy = tag.CreatedBy
                 }
             };
         }

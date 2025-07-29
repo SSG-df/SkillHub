@@ -11,5 +11,7 @@ namespace SkillHubApi.Dtos
         [JsonConverter(typeof(DateTimeJsonConverter))]
         public DateTime Date { get; set; }
         public bool IsPresent { get; set; }
+        public Guid? LessonId { get; set; }
+        public Guid? UserId { get; set; }
     }
 }

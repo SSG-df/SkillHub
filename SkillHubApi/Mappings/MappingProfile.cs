@@ -11,8 +11,10 @@ namespace SkillHubApi.Mappings
         {
             CreateMap<Tag, TagDto>();
             CreateMap<TagDto, Tag>();
-            CreateMap<TagCreateDto, Tag>();
-            CreateMap<TagUpdateDto, Tag>();
+           CreateMap<TagCreateDto, Tag>()
+            .ForMember(dest => dest.CreatedBy, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
+            CreateMap<TagUpdateDto, Tag>(); 
 
             CreateMap<User, UserDto>();
             CreateMap<UserCreateDto, User>();
@@ -33,8 +35,10 @@ namespace SkillHubApi.Mappings
             CreateMap<Lesson, LessonDto>()
                 .ForMember(dest => dest.Difficulty, opt => opt.MapFrom(src => src.Difficulty.ToString()));
 
-            CreateMap<Review, ReviewDto>();
-            CreateMap<ReviewCreateDto, Review>();
+            CreateMap<Review, ReviewDto>()
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
+            CreateMap<ReviewCreateDto, Review>()
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
             CreateMap<ReviewUpdateDto, Review>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
 

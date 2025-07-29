@@ -19,21 +19,31 @@ namespace SkillHubApi.Services
 
         public async Task<IEnumerable<TagDto>> GetAllAsync()
         {
-            var tags = await _context.Tags.ToListAsync();
-            return _mapper.Map<IEnumerable<TagDto>>(tags);
+            return await _context.Tags
+                .AsNoTracking()
+                .Select(t => _mapper.Map<TagDto>(t))
+                .ToListAsync();
         }
 
         public async Task<TagDto?> GetByIdAsync(Guid id)
         {
-            var tag = await _context.Tags.FindAsync(id);
+            var tag = await _context.Tags
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Id == id);
             return tag == null ? null : _mapper.Map<TagDto>(tag);
         }
-
-        public async Task<TagDto> CreateAsync(TagCreateDto tagCreateDto)
+        public async Task<TagDto> CreateAsync(TagCreateDto tagCreateDto, Guid currentUserId)
         {
-            var tag = _mapper.Map<Tag>(tagCreateDto);
+        var tag = new Tag
+        {
+            Name = tagCreateDto.Name,
+            CreatedBy = currentUserId,
+            CreatedAt = DateTime.UtcNow
+        };
+
             _context.Tags.Add(tag);
             await _context.SaveChangesAsync();
+    
             return _mapper.Map<TagDto>(tag);
         }
 

@@ -16,8 +16,10 @@ namespace SkillHubApi.Data
             {
                 Username = "admin",
                 Email = "admin@skillhub.com",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123"), 
-                Role = UserRole.Admin
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123"),
+                Role = UserRole.Admin,
+                Bio = "Administrator with all the powers",
+                CreatedAt = DateTime.UtcNow
             };
 
             var mentor = new User
@@ -26,7 +28,8 @@ namespace SkillHubApi.Data
                 Email = "mentor@skillhub.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("Mentor123"),
                 Role = UserRole.Mentor,
-                Bio = "Super puper mentor with 100 years experience in .NET"
+                Bio = "Super puper mentor with 100 years experience in .NET",
+                CreatedAt = DateTime.UtcNow
             };
 
             var learner = new User
@@ -36,6 +39,7 @@ namespace SkillHubApi.Data
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("Learner123"),
                 Role = UserRole.Learner,
                 Bio = "Motivation podnyat",
+                CreatedAt = DateTime.UtcNow
             };
 
             context.Users.AddRange(admin, mentor, learner);
@@ -114,7 +118,7 @@ namespace SkillHubApi.Data
             var review = new Review
             {
                 LessonId = lesson1.Id,
-                UserId = learner.Id,
+                CreatedBy = learner.Id,
                 Rating = 5,
                 Comment = "Awesome lesson",
                 IsVisible = true
@@ -145,8 +149,9 @@ namespace SkillHubApi.Data
             var reportRequest = new ReportRequest
             {
                 RequestedById = admin.Id,
-                Type = ReportType.LessonSummary,
-                Format = "Formant"
+                LessonId = lesson1.Id,
+                Reason = "Spam",
+                RequestedAt = DateTime.UtcNow
             };
 
             context.ReportRequests.Add(reportRequest);

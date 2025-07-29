@@ -1,7 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using SkillHubApi.Dtos;
 using SkillHubApi.Models;
-using SkillHubApi.Services;
 
 namespace SkillHubApi.Dtos
 {
@@ -9,29 +7,42 @@ namespace SkillHubApi.Dtos
     {
         [Required, MaxLength(50)]
         public string Username { get; set; } = string.Empty;
+        
         [Required, EmailAddress]
         public string Email { get; set; } = string.Empty;
-        [Required, MinLength(6)]
+        
+        [Required, MinLength(4)]
         public string Password { get; set; } = string.Empty;
+        
         [Required]
-        public string Role { get; set; } = string.Empty;
+        public UserRole Role { get; set; } = UserRole.Learner; 
     }
 
     public class LoginDto
     {
         [Required]
         public string Username { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
+        
         [Required]
         public string Password { get; set; } = string.Empty;
     }
 
    public class AuthResponseDto
-{
-    public string? Token { get; set; }
-    public UserDto? User { get; set; }
-    public bool Success { get; set; }
-    public string? ErrorMessage { get; set; }
-    public object? Data { get; set; }
-}
+    {
+        public string Token { get; set; } = string.Empty;
+        public string AccessToken { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
+        public DateTime AccessTokenExpiry { get; set; }
+        public UserDto User { get; set; } = null!;
+        public bool Success { get; set; }
+        public string? ErrorMessage { get; set; }
+    }
+
+    public class ChangePasswordDto
+    {
+        [Required]
+        public string CurrentPassword { get; set; } = string.Empty;
+        [Required, MinLength(4)]
+        public string NewPassword { get; set; } = string.Empty;
+    }
 }

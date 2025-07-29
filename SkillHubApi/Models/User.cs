@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using SkillHubApi.Models;
 using SkillHubApi.Dtos;
+using System.Text.Json.Serialization;
+using System.Security.Cryptography.X509Certificates;
 
 
 namespace SkillHubApi.Models
@@ -20,6 +22,8 @@ namespace SkillHubApi.Models
         public string Email { get; set; } = string.Empty;
         [Required]
         public string PasswordHash { get; set; } = string.Empty;
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public DateTime CreatedAt { get; set; }
         [Required]
         public UserRole Role { get; set; }
         [MaxLength(1000)]
@@ -28,5 +32,7 @@ namespace SkillHubApi.Models
         public ICollection<Lesson>? CreatedLessons { get; set; }
         public ICollection<LessonEnrollment>? Enrollments { get; set; }
         public ICollection<Review>? Reviews { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime RefreshTokenExpiry { get; set; }
     }
 }

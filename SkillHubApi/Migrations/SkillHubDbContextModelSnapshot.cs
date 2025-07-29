@@ -45,6 +45,12 @@ namespace SkillHubApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -54,6 +60,10 @@ namespace SkillHubApi.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("LessonId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -110,6 +120,9 @@ namespace SkillHubApi.Migrations
                     b.Property<DateTime>("EnrolledAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsCancelled")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");
 
@@ -139,6 +152,9 @@ namespace SkillHubApi.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("LessonId", "TagId");
 
                     b.HasIndex("TagId");
@@ -152,8 +168,7 @@ namespace SkillHubApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Format")
-                        .IsRequired()
+                    b.Property<Guid?>("LessonId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Reason")
@@ -166,8 +181,8 @@ namespace SkillHubApi.Migrations
                     b.Property<Guid>("RequestedById")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -182,7 +197,15 @@ namespace SkillHubApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ModeratorComment")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("ReportedAt")
@@ -195,6 +218,8 @@ namespace SkillHubApi.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ReporterId");
 
                     b.HasIndex("ReviewId");
 
@@ -214,7 +239,10 @@ namespace SkillHubApi.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsVisible")
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("IsVisible")
                         .HasColumnType("INTEGER");
 
                     b.Property<Guid>("LessonId")
@@ -223,7 +251,7 @@ namespace SkillHubApi.Migrations
                     b.Property<int>("Rating")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid?>("UserId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -239,6 +267,12 @@ namespace SkillHubApi.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("CreatedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -261,6 +295,9 @@ namespace SkillHubApi.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -270,6 +307,12 @@ namespace SkillHubApi.Migrations
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("RefreshTokenExpiry")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Role")
@@ -369,11 +412,19 @@ namespace SkillHubApi.Migrations
 
             modelBuilder.Entity("SkillHubApi.Models.ReportedReview", b =>
                 {
+                    b.HasOne("SkillHubApi.Models.User", "Reporter")
+                        .WithMany()
+                        .HasForeignKey("ReporterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("SkillHubApi.Models.Review", "Review")
                         .WithMany()
                         .HasForeignKey("ReviewId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Reporter");
 
                     b.Navigation("Review");
                 });
@@ -388,9 +439,7 @@ namespace SkillHubApi.Migrations
 
                     b.HasOne("SkillHubApi.Models.User", "User")
                         .WithMany("Reviews")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Lesson");
 

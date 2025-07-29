@@ -42,9 +42,16 @@ namespace SkillHubApi.Services
 
         public async Task<AttendanceDto> AddAsync(AttendanceCreateDto dto)
         {
+
+            var enrollmentExists = await _context.LessonEnrollments
+            .AnyAsync(e => e.Id == dto.LessonEnrollmentId);
+    
+            if (!enrollmentExists)
+                throw new ArgumentException("Lesson enrollment not found");
+
             var attendance = new Attendance
             {
-                Id = Guid.NewGuid(),
+
                 EnrollmentId = dto.LessonEnrollmentId,
                 AttendedAt = dto.Date,
                 IsPresent = dto.IsPresent
@@ -52,7 +59,7 @@ namespace SkillHubApi.Services
 
             _context.Attendances.Add(attendance);
             await _context.SaveChangesAsync();
-
+            
             return new AttendanceDto
             {
                 Id = attendance.Id,
@@ -83,6 +90,16 @@ namespace SkillHubApi.Services
             _context.Attendances.Remove(attendance);
             await _context.SaveChangesAsync();
             return true;
+        }
+        public async Task<bool> VerifyAccessAsync(Guid userId, Guid attendanceId)
+        {
+            var attendance = await _context.Attendances
+            .Include(a => a.Enrollment)
+            .FirstOrDefaultAsync(a => a.Id == attendanceId);
+
+            if (attendance == null || attendance.Enrollment == null) 
+            return false;
+            return attendance.Enrollment.UserId == userId;
         }
     }
 }

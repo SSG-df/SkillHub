@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using SkillHubApi.Dtos;
 using SkillHubApi.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace SkillHubApi.Controllers
 {
@@ -15,76 +17,148 @@ namespace SkillHubApi.Controllers
             _userService = userService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 20)
         {
             var users = await _userService.GetAllAsync(pageNumber, pageSize);
             return Ok(users);
         }
 
+        [Authorize]
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<ActionResult<UserDto>> GetById(Guid id)
         {
+            var currentUserId = GetCurrentUserId();
+            var currentUserRole = GetCurrentUserRole();
+
+            if (currentUserRole != "Admin" && currentUserId != id)
+            {
+                return Forbid();
+            }
+
             var user = await _userService.GetByIdAsync(id);
-            if (user == null) return NotFound();
-            return Ok(user);
+            return user == null ? NotFound() : Ok(user);
         }
 
+        [Authorize]
         [HttpGet("by-username/{username}")]
-        public async Task<IActionResult> GetByUsername(string username)
+        public async Task<ActionResult<UserDto>> GetByUsername(string username)
         {
+            var currentUserRole = GetCurrentUserRole();
+            var currentUserId = GetCurrentUserId();
+
+            if (currentUserRole == "Learner")
+            {
+                var currentUser = await _userService.GetByIdAsync(currentUserId);
+                if (currentUser?.Username != username)
+                {
+                    return Forbid();
+                }
+            }
+            else if (currentUserRole == "Mentor")
+            {
+                var requestedUser = await _userService.GetByUsernameAsync(username);
+                if (requestedUser?.Role.ToString() == "Admin")
+                {
+                    return Forbid();
+                }
+            }
+
             var user = await _userService.GetByUsernameAsync(username);
-            if (user == null) return NotFound();
-            return Ok(user);
+            return user == null ? NotFound() : Ok(user);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] UserCreateDto dto)
+        [Authorize(Roles = "Admin")]
+        [HttpPost("admin")]
+        public async Task<ActionResult<UserDto>> CreateAdminUser([FromBody] UserCreateDto dto)
         {
-            var success = await _userService.CreateAsync(dto);
-            if (!success) return BadRequest("Failed to create user.");
-            return Ok();
+            var result = await _userService.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
 
+        [Authorize]
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] UserUpdateDto dto)
         {
+            var currentUserId = GetCurrentUserId();
+            var currentUserRole = GetCurrentUserRole();
+
+            if (currentUserRole != "Admin" && currentUserId != dto.Id)
+            {
+                return Forbid();
+            }
+
             var success = await _userService.UpdateAsync(dto);
-            if (!success) return NotFound();
-            return Ok();
+            return success ? Ok() : NotFound();
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var success = await _userService.DeleteAsync(id);
+            return success ? NoContent() : NotFound();
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}/activate")]
         public async Task<IActionResult> Activate(Guid id)
         {
             var success = await _userService.ActivateAsync(id);
-            if (!success) return NotFound();
-            return Ok();
+            return success ? Ok() : NotFound();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}/deactivate")]
         public async Task<IActionResult> Deactivate(Guid id)
         {
             var success = await _userService.DeactivateAsync(id);
-            if (!success) return NotFound();
-            return Ok();
+            return success ? Ok() : NotFound();
         }
 
-        [HttpPost("{id}/check-password")]
-        public async Task<IActionResult> CheckPassword(Guid id, [FromBody] string password)
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
         {
-            var isCorrect = await _userService.CheckPasswordAsync(id, password);
-            return Ok(isCorrect);
+            var currentUserId = GetCurrentUserId();
+            var success = await _userService.ChangePasswordAsync(currentUserId, dto);
+            return success ? Ok() : BadRequest("Password change failed");
         }
 
+        [AllowAnonymous]
+        [HttpPost("register")]
+        public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterDto dto)
+        {
+            var result = await _userService.RegisterAsync(dto);
+            return result.Success ? Ok(result) : BadRequest(result.ErrorMessage);
+        }
+
+        [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginDto dto)
         {
-            var result = await _userService.LoginAsync(loginDto);
-            if (result == null)
-                return Unauthorized("Invalid credentials");
+            var result = await _userService.LoginAsync(dto);
+            return result.Success ? Ok(result) : Unauthorized(result.ErrorMessage);
+        }
 
-            return Ok(result);
+        [Authorize]
+        [HttpGet("profile")]
+        public async Task<ActionResult<UserDto>> GetProfile()
+        {
+            var currentUserId = GetCurrentUserId();
+            var user = await _userService.GetByIdAsync(currentUserId);
+            return user == null ? NotFound() : Ok(user);
+        }
+
+        private Guid GetCurrentUserId()
+        {
+            return Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+        }
+
+        private string GetCurrentUserRole()
+        {
+            return User.FindFirst(ClaimTypes.Role)?.Value;
         }
     }
 }

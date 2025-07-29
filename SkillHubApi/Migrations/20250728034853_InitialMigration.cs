@@ -16,7 +16,9 @@ namespace SkillHubApi.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false)
+                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -31,6 +33,7 @@ namespace SkillHubApi.Migrations
                     Username = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "TEXT", nullable: false),
                     PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Role = table.Column<int>(type: "INTEGER", nullable: false),
                     Bio = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false)
@@ -93,6 +96,7 @@ namespace SkillHubApi.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     FileName = table.Column<string>(type: "TEXT", nullable: false),
                     FileType = table.Column<string>(type: "TEXT", nullable: false),
+                    StoragePath = table.Column<string>(type: "TEXT", nullable: false),
                     LessonId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -114,7 +118,8 @@ namespace SkillHubApi.Migrations
                     UserId = table.Column<Guid>(type: "TEXT", nullable: false),
                     LessonId = table.Column<Guid>(type: "TEXT", nullable: false),
                     EnrolledAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    IsCompleted = table.Column<bool>(type: "INTEGER", nullable: false)
+                    IsCompleted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsCancelled = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

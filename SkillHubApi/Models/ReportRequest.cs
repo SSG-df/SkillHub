@@ -4,21 +4,15 @@ using SkillHubApi.Dtos;
 
 namespace SkillHubApi.Models
 {
-    public enum ReportType
-    {
-        UserSummary,
-        LessonSummary,
-        MentorLessons
-    }
     public class ReportRequest
     {
         public Guid Id { get; set; } = Guid.NewGuid();
-        public Guid RequestedById { get; set; }
-        public User? RequestedBy { get; set; }
-        public string Reason { get; set; } = string.Empty;
-        public ReportType Type { get; set; }
+        public Guid RequestedById { get; set; }  
+        public virtual User? RequestedBy { get; set; }
+        public string Reason { get; set; } = string.Empty; 
+        public Guid? LessonId { get; set; }          
+        public Guid? UserId { get; set; }             
         [JsonConverter(typeof(DateTimeJsonConverter))]
         public DateTime RequestedAt { get; set; }
-        public string Format { get; set; } = "CSV";
     }
 }

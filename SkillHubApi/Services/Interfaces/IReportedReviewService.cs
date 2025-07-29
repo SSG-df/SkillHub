@@ -9,5 +9,6 @@ namespace SkillHubApi.Services
         Task<ReportedReviewDto> CreateAsync(ReportedReviewCreateDto dto);
         Task<bool> UpdateAsync(Guid id, ReportedReviewUpdateDto dto);
         Task<bool> DeleteAsync(Guid id);
+        
     }
 }

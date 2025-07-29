@@ -151,3 +151,15 @@
 /home/sqwert/SkillHub/SkillHubApi/obj/Debug/net8.0/SkillHubApi.genruntimeconfig.cache
 /home/sqwert/SkillHub/SkillHubApi/obj/Debug/net8.0/ref/SkillHubApi.dll
 /home/sqwert/SkillHub/SkillHubApi/bin/Debug/net8.0/BCrypt.Net-Next.dll
+/home/sqwert/SkillHub/SkillHubApi/bin/Debug/net8.0/Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore.dll
+/home/sqwert/SkillHub/SkillHubApi/bin/Debug/net8.0/Microsoft.Extensions.Configuration.Abstractions.dll
+/home/sqwert/SkillHub/SkillHubApi/bin/Debug/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+/home/sqwert/SkillHub/SkillHubApi/bin/Debug/net8.0/Microsoft.Extensions.Diagnostics.Abstractions.dll
+/home/sqwert/SkillHub/SkillHubApi/bin/Debug/net8.0/Microsoft.Extensions.Diagnostics.HealthChecks.dll
+/home/sqwert/SkillHub/SkillHubApi/bin/Debug/net8.0/Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions.dll
+/home/sqwert/SkillHub/SkillHubApi/bin/Debug/net8.0/Microsoft.Extensions.FileProviders.Abstractions.dll
+/home/sqwert/SkillHub/SkillHubApi/bin/Debug/net8.0/Microsoft.Extensions.Hosting.Abstractions.dll
+/home/sqwert/SkillHub/SkillHubApi/bin/Debug/net8.0/Microsoft.Extensions.Logging.Abstractions.dll
+/home/sqwert/SkillHub/SkillHubApi/bin/Debug/net8.0/Microsoft.Extensions.Options.dll
+/home/sqwert/SkillHub/SkillHubApi/bin/Debug/net8.0/Microsoft.Extensions.Primitives.dll
+/home/sqwert/SkillHub/SkillHubApi/bin/Debug/net8.0/System.Diagnostics.DiagnosticSource.dll
